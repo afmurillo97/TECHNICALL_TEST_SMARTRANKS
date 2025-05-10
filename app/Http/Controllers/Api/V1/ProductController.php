@@ -113,7 +113,7 @@ class ProductController extends BaseController
             return $this->successResponse('Product deleted successfully', null, 200);
         } catch (\Exception $e) {
             Log::error('Error deleting product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
-            return $this->errorResponse('Failed to delete post', 500);
+            return $this->errorResponse('Failed to delete product', 500);
         }
     }
 }
