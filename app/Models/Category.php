@@ -26,4 +26,14 @@ class Category extends Model
     protected $casts = [
         'status'      => 'boolean',
     ];
+
+    public function getExcerptAttribute() 
+    {
+        return substr($this->description, 0, 50);
+    }
+
+    public function getPublishedAtAttribute()
+    {
+        return $this->created_at->format('d/m/Y');
+    }
 }
