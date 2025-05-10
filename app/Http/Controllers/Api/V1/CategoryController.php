@@ -3,64 +3,101 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Category;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\BaseController;
+use App\Http\Resources\Api\V1\CategoryResource;
+use App\Http\Requests\CategoryFormRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
-class CategoryController extends Controller
+class CategoryController extends BaseController
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return CategoryResource::collection(Category::latest()->paginate(3));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CategoryFormRequest $request): JsonResponse
     {
-        //
+        DB::beginTransaction();
+        try {
+            $category = new category();
+            $category->fill($request->validated());
+
+            $category->save();
+
+            DB::commit();
+            return $this->successResponse('Category created succesfully!!', ['category_id' => $category->id], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating category ' . $e->getMessage() . ' In line: ' . $e->getLine());
+            return $this->errorResponse('Failed to create category', 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show($id): JsonResponse
     {
-        //
-    }
+        try {
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Category $category)
-    {
-        //
+            $category = category::findOrFail($id);
+
+            return $this->successResponse(
+                'Category retrieved successfully',
+                new categoryResource($category),
+                200
+            );
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('category Not Found', 404);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(CategoryFormRequest $request, Category $category): JsonResponse
     {
-        //
+        DB::beginTransaction();
+        try {
+            $category->fill($request->validated());
+
+            if (!$category->isDirty()) {
+                return $this->successResponse('No changes detected!!', null, 200);
+            } 
+            
+            $category->update();
+
+            DB::commit();
+            return $this->successResponse('Category updated succesfully!!', null, 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating category ' . $e->getMessage() . ' In Line: ' . $e->getLine());
+            return $this->errorResponse('Failed to update category', 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category): JsonResponse
     {
-        //
+        try {
+            $category->delete();
+
+            return $this->successResponse('Category deleted successfully', null, 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting category ' . $e->getMessage() . ' In Line: ' . $e->getLine());
+            return $this->errorResponse('Failed to delete category', 500);
+        }
     }
 }
