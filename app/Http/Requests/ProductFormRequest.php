@@ -49,7 +49,7 @@ class ProductFormRequest extends FormRequest
             'purchase_price' => 'required|numeric|min:0.01',
             'sale_price' => 'required|numeric|min:0.05|gte:purchase_price',
             'stock' => 'nullable|integer|min:0',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', //2MB MAX
+            'featured_image' => 'nullable|string',
             'status' => 'sometimes|boolean',
         ];
     }
