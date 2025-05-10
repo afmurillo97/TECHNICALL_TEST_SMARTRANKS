@@ -6,7 +6,8 @@ use App\Models\Product;
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\ProductResource;
 use App\Http\Requests\ProductFormRequest;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -16,23 +17,15 @@ class ProductController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
         return ProductResource::collection(Product::latest()->paginate(5));
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductFormRequest $request)
+    public function store(ProductFormRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -60,33 +53,67 @@ class ProductController extends BaseController
 
     /**
      * Display the specified resource.
+     * 
      */
-    public function show(Product $product)
+    public function show($id): JsonResponse
     {
-        //
-    }
+        try {
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
+            $product = Product::findOrFail($id);
+
+            return $this->successResponse(
+                'Product retrieved successfully',
+                new ProductResource($product),
+                200
+            );
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Product Not Found', 404);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductFormRequest $request, Product $product): JsonResponse
     {
-        //
+        DB::beginTransaction();
+        try {
+            $product->fill($request->validated());
+
+            if($request->hasFile('featured_image')){
+                $featuredImage = $request->file('featured_image');
+                $featuredImageName = Str::slug($request->name) . '-' . uniqid() . '.' . $featuredImage->getClientOriginalExtension();
+                $featuredImagePath = $featuredImage->storeAs('public/products', $featuredImageName);
+
+                $product->featured_image = 'storage/' . str_replace('public/', '', $featuredImagePath);
+            }
+            if (!$product->isDirty()) {
+                return $this->successResponse('No changes detected!!', null, 200);
+            } 
+            
+            $product->update();
+
+            DB::commit();
+            return $this->successResponse('Product updated succesfully!!', null, 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
+            return $this->errorResponse('Failed to update product', 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy(Product $product): JsonResponse
     {
-        //
+        try {
+            $product->delete();
+
+            return $this->successResponse('Product deleted successfully', null, 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
+            return $this->errorResponse('Failed to delete post', 500);
+        }
     }
 }
