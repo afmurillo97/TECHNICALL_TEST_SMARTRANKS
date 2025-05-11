@@ -39,4 +39,9 @@ class Product extends Model
     public function category(){
         return $this->belongsTo(Category::class);
     }
+    
+    public function getPublishedAtAttribute()
+    {
+        return $this->created_at->format('d/m/Y');
+    }
 }
