@@ -26,9 +26,9 @@ class ProductFactory extends Factory
         return [
             'category_id' => function() {
                 return Category::inRandomOrder()->first()->id 
-                    ?? Category::factory(); // Fallback si no hay categorías
+                    ?? Category::factory();
             },
-            'name' => $this->faker->unique()->words(2, true),
+            'name' => $this->generateProductName(),
             'sku' => Str::upper(Str::random(10)),
             'description' => $this->faker->paragraph(),
             'purchase_price' => $purchasePrice,
@@ -37,5 +37,38 @@ class ProductFactory extends Factory
             'featured_image' => $this->faker->imageUrl(800, 600, 'products', true, 'electronics', true),
             'status' => $this->faker->boolean(80),
         ];
+    }
+
+     /**
+     * Populates Products names.
+     *
+     */
+    private function generateProductName(): string
+    {
+        $productTypes = [
+            'Laptop', 'Smartphone', 'Tablet', 'Monitor', 
+            'Keyboard', 'Mouse', 'Printer', 'SSD', 
+            'Router', 'Webcam'
+        ];
+        
+        $brands = [
+            'HP', 'Dell', 'Samsung', 'Apple', 
+            'Logitech', 'Sony', 'Lenovo', 'Asus',
+            'Acer', 'MSI'
+        ];
+        
+        $features = [
+            'Pro', 'Max', 'Elite', 'Gaming', 
+            'Ultra', 'Plus', 'XT', 'Limited', 
+            'Edition', 'Turbo'
+        ];
+
+        return sprintf(
+            '%s %s %s %s',
+            $this->faker->randomElement($brands),
+            $this->faker->randomElement($productTypes),
+            $this->faker->randomElement($features),
+            $this->faker->numberBetween(1000, 9999)
+        );
     }
 }

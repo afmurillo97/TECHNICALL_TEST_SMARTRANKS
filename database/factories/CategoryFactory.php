@@ -17,10 +17,36 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->words(3, true),
+            'name' => $this->generateCategoryName(),
             'description' => $this->faker->paragraph(),
             'featured_image' => $this->faker->imageUrl(800, 600, 'categories', true, 'electronics', true),
             'status' => $this->faker->boolean(90),
         ];
+    }
+
+    /**
+     * Populates Categories names.
+     *
+     */
+    private function generateCategoryName(): string
+    {
+        $mainCategories = [
+            'Electronics', 'Clothing', 'Home & Garden', 
+            'Sports', 'Beauty', 'Toys', 
+            'Books', 'Automotive', 'Health', 
+            'Office'
+        ];
+
+        $subcategories = [
+            'Accessories', 'Gadgets', 'Premium', 
+            'Budget', 'Vintage', 'Modern',
+            'Professional', 'DIY', 'Luxury'
+        ];
+
+        return sprintf(
+            '%s %s',
+            $this->faker->randomElement($mainCategories),
+            $this->faker->randomElement($subcategories)
+        );
     }
 }
