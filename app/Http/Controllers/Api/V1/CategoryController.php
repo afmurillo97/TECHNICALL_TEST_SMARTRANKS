@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\CategoryResource;
 use App\Http\Resources\Api\V1\CategoryCollection;
 use App\Http\Requests\CategoryFormRequest;
+use App\Filters\CategoryFilter;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Str;
@@ -18,10 +20,22 @@ class CategoryController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(): CategoryCollection
+    public function index(Request $request): CategoryCollection
     {
+        $filter = new CategoryFilter();
+        $queryItems = $filter->transform($request);
+        
+        $includeProducts = $request->query('include');
+
+        $categories = Category::where($queryItems);
+        if ($includeProducts) {
+            $categories = $categories->with('products');
+        }
+
         return new CategoryCollection(
-            Category::latest()->paginate(5)
+            $categories
+                ->paginate()
+                ->appends($request->query())
         );
     }
 
@@ -53,7 +67,7 @@ class CategoryController extends BaseController
     {
         try {
 
-            $category = category::findOrFail($id);
+            $category = Category::findOrFail($id);
 
             return $this->successResponse(
                 'Category retrieved successfully',
