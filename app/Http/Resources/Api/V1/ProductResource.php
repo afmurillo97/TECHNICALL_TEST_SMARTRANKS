@@ -23,7 +23,7 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'price' => (float)$this->sale_price,
             'stock' => $this->stock,
-            'created_at' => $this->created_at,
+            'created_at' => $this->published_at,
             'product_images' => [
                 'featured_image' => $this->featured_image,
             ]
