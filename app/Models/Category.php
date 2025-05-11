@@ -39,6 +39,6 @@ class Category extends Model
 
     public function getPublishedAtAttribute()
     {
-        return $this->created_at->format('d/m/Y');
+        return $this->created_at->format('Y-m-d');
     }
 }
