@@ -27,6 +27,11 @@ class Category extends Model
         'status'      => 'boolean',
     ];
 
+    public function products() 
+    {
+        return $this->hasMany(Product::class);
+    }
+
     public function getExcerptAttribute() 
     {
         return substr($this->description, 0, 50);
