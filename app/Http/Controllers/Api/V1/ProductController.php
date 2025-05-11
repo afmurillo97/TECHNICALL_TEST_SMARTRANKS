@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Product;
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\ProductResource;
+use App\Http\Resources\Api\V1\ProductCollection;
 use App\Http\Requests\ProductFormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -17,9 +18,11 @@ class ProductController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): ProductCollection
     {
-        return ProductResource::collection(Product::latest()->paginate(5));
+        return new ProductCollection(
+            Product::latest()->paginate(15)
+        );
     }
 
     /**

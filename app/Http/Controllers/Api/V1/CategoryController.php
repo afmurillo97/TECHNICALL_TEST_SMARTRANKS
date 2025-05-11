@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Category;
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\CategoryResource;
+use App\Http\Resources\Api\V1\CategoryCollection;
 use App\Http\Requests\CategoryFormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -17,9 +18,11 @@ class CategoryController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): CategoryCollection
     {
-        return CategoryResource::collection(Category::latest()->paginate(3));
+        return new CategoryCollection(
+            Category::latest()->paginate(5)
+        );
     }
 
     /**
