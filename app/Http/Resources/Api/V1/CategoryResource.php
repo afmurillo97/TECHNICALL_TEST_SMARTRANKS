@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Api\V1\ProductResource;
 
 class CategoryResource extends JsonResource
 {
@@ -20,7 +21,9 @@ class CategoryResource extends JsonResource
             'description_excerpt' => $this->excerpt,
             'created_at' => $this->published_at,
             'url_image' => $this->featured_image,
-            
+            'products' => $this->when($this->relationLoaded('products'), function () {
+                return ProductResource::collection($this->products);
+            }),
         ];
     }
 }
