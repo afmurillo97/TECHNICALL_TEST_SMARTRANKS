@@ -13,8 +13,16 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        if (Category::count() === 0) {
-            Category::factory(5)->create();
-        }
+        Category::factory()
+            ->count(8)
+            ->hasProducts(rand(1, 50))
+            ->create();
+        Category::factory()
+            ->count(12)
+            ->hasProducts(rand(1, 100))
+            ->create();
+        Category::factory()
+            ->count(4)
+            ->create();
     }
 }
