@@ -17,7 +17,6 @@ class CategoryFilter extends ApiFilter {
         'category_name' => 'name',
         'description_excerpt' => 'description',
         'url_image' => 'featured_image',
-        'created_at' => 'created_at'
     ];
     protected $operatorMap = [
         'eq' => '=',
