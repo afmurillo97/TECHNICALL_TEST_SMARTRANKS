@@ -20,17 +20,24 @@ class ProductController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): ProductCollection
+    public function index(Request $request): JsonResponse
     {
         $filter = new ProductFilter();
         $queryItems = $filter->transform($request);
+
+        $products = Product::where($queryItems);
+
+        $productsCollection = new ProductCollection(
+            $products
+                ->paginate()
+                ->appends($request->query())
+        );
         
-        if (count($queryItems) == 0) {
-            return new ProductCollection(Product::paginate());
-        } else {
-            $products = Product::where($queryItems)->paginate();
-            return new ProductCollection($products->appends($request->query()));
-        }
+        return $this->successResponse(
+            'Products retrieved successfully',
+            $productsCollection,
+            200
+        );
     }
 
     /**
@@ -54,7 +61,11 @@ class ProductController extends BaseController
             $product->save();
 
             DB::commit();
-            return $this->successResponse('Product created succesfully!!', ['product_id' => $product->id], 201);
+            return $this->successResponse(
+                'Product created succesfully!!', 
+                ['product_id' => $product->id], 
+                201
+            );
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating product ' . $e->getMessage() . ' In line: ' . $e->getLine());

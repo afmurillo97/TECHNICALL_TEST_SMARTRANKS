@@ -20,7 +20,7 @@ class CategoryController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): CategoryCollection
+    public function index(Request $request): JsonResponse
     {
         $filter = new CategoryFilter();
         $queryItems = $filter->transform($request);
@@ -32,10 +32,16 @@ class CategoryController extends BaseController
             $categories = $categories->with('products');
         }
 
-        return new CategoryCollection(
+        $categoriesCollection = new CategoryCollection(
             $categories
                 ->paginate()
                 ->appends($request->query())
+        );
+
+        return $this->successResponse(
+            'Categories retrieved successfully',
+            $categoriesCollection,
+            200
         );
     }
 
@@ -52,7 +58,10 @@ class CategoryController extends BaseController
             $category->save();
 
             DB::commit();
-            return $this->successResponse('Category created succesfully!!', ['category_id' => $category->id], 201);
+            return $this->successResponse(
+                'Category created succesfully!!', 
+                ['category_id' => $category->id], 
+            201);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating category ' . $e->getMessage() . ' In line: ' . $e->getLine());
@@ -68,6 +77,11 @@ class CategoryController extends BaseController
         try {
 
             $category = Category::findOrFail($id);
+            $includeProducts = request()->query('include');
+
+            if ($includeProducts) {
+                $category->loadMissing('products');
+            }
 
             return $this->successResponse(
                 'Category retrieved successfully',
