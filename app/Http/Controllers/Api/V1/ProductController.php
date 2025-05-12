@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\ProductResource;
 use App\Http\Resources\Api\V1\ProductCollection;
 use App\Http\Requests\ProductFormRequest;
+use App\Filters\ProductFilter;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Str;
@@ -18,11 +20,18 @@ class ProductController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(): ProductCollection
+    public function index(Request $request): ProductCollection
     {
-        return new ProductCollection(
-            Product::latest()->paginate(15)
-        );
+        $filter = new ProductFilter();
+        $queryItems = $filter->transform($request);
+        
+        if (count($queryItems) == 0) {
+            return new ProductCollection(Product::paginate());
+        } else {
+            $products = Product::where($queryItems)->paginate();
+            \Log::info(Product::where($queryItems)->toSql());
+            return new ProductCollection($products->appends($request->query()));
+        }
     }
 
     /**
