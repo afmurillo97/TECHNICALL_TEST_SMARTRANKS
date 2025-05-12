@@ -40,6 +40,10 @@ class ApiFilter
                         }];
                         continue;
                     }
+
+                    if (in_array($column, ['sale_price', 'purchase_price'])) {
+                        $value = (float)number_format((float)$value, 2, '.', '');
+                    }
                     
                     $eloQuery[] = [$column, $this->operatorMap[$operator], $value];
                 }
