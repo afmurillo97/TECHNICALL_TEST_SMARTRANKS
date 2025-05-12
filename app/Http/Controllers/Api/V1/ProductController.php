@@ -29,7 +29,6 @@ class ProductController extends BaseController
             return new ProductCollection(Product::paginate());
         } else {
             $products = Product::where($queryItems)->paginate();
-            \Log::info(Product::where($queryItems)->toSql());
             return new ProductCollection($products->appends($request->query()));
         }
     }
