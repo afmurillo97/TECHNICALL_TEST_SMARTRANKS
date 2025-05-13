@@ -27,7 +27,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/{product}', [ProductController::class, 'show']);
 
         Route::post('/', [ProductController::class, 'store']);
+        Route::post('/bulk', [ProductController::class, 'bulkStore']);
         Route::put('/{product}', [ProductController::class, 'update']);
+        Route::patch('/{product}', [ProductController::class, 'update']);
         Route::delete('/{product}', [ProductController::class, 'destroy']);
     });
 
