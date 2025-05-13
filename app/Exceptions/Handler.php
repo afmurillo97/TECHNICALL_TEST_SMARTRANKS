@@ -54,34 +54,30 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof AuthenticationException) {
-            return response()->json([
-                'error' => 'Unauthorized'
-            ], 401);
-        }
+        if ($request->is('api/*')) {
+            if ($exception instanceof AuthenticationException || $exception instanceof RouteNotFoundException) {
+                return response()->json([
+                    'message' => 'Unauthenticated.'
+                ], 401);
+            }
 
-        if ($exception instanceof AccessDeniedHttpException) {
-            return response()->json([
-                'error' => 'Forbidden'
-            ], 403);
-        }
+            if ($exception instanceof AccessDeniedHttpException) {
+                return response()->json([
+                    'message' => 'Forbidden'
+                ], 403);
+            }
 
-        if ($exception instanceof RouteNotFoundException) {
-            return response()->json([
-                'error' => 'Unauthorized, you must log in first'
-            ], 401);
-        }
+            if ($exception instanceof MethodNotAllowedHttpException) {
+                return response()->json([
+                    'message' => 'Method not allowed'
+                ], 405);
+            }
 
-        if ($exception instanceof MethodNotAllowedHttpException) {
-            return response()->json([
-                'error' => 'Method not allowed'
-            ], 405);
-        }
-
-        if ($exception instanceof ModelNotFoundException || $exception instanceof NotFoundHttpException) {
-            return response()->json([
-                'error' => 'Resource not found'
-            ], 404);
+            if ($exception instanceof ModelNotFoundException || $exception instanceof NotFoundHttpException) {
+                return response()->json([
+                    'message' => 'Resource not found'
+                ], 404);
+            }
         }
 
         return parent::render($request, $exception);
