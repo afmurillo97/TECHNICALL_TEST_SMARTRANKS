@@ -16,7 +16,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/{category}', [CategoryController::class, 'show']);
 
         Route::post('/', [CategoryController::class, 'store']);
+        Route::post('/bulk', [CategoryController::class, 'bulkStore']);
         Route::put('/{category}', [CategoryController::class, 'update']);
+        Route::patch('/{category}', [CategoryController::class, 'update']);
         Route::delete('/{category}', [CategoryController::class, 'destroy']);
     });
 
