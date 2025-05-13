@@ -33,7 +33,6 @@ class UpdateCategoryRequest extends FormRequest
             ];
         }
         
-        // Para PATCH
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string', 'max:500'],
