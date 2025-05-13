@@ -6,7 +6,9 @@ use App\Models\Category;
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\CategoryResource;
 use App\Http\Resources\Api\V1\CategoryCollection;
-use App\Http\Requests\CategoryFormRequest;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Requests\BulkStoreCategoryRequest;
 use App\Filters\CategoryFilter;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -27,7 +29,7 @@ class CategoryController extends BaseController
         
         $includeProducts = $request->query('include');
 
-        $categories = Category::where($queryItems);
+        $categories = Category::where($queryItems)->latest();
         if ($includeProducts) {
             $categories = $categories->with('products');
         }
@@ -48,7 +50,7 @@ class CategoryController extends BaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryFormRequest $request): JsonResponse
+    public function store(StoreCategoryRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -66,6 +68,44 @@ class CategoryController extends BaseController
             DB::rollBack();
             Log::error('Error creating category ' . $e->getMessage() . ' In line: ' . $e->getLine());
             return $this->errorResponse('Failed to create category', 500);
+        }
+    }
+
+    /**
+     * Store several resources in storage.
+     */
+    public function bulkStore(BulkStoreCategoryRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $validatedData = $request->validated();
+            
+            $bulkData = collect($validatedData)->map(function ($categoryData) {
+                return [
+                    'name' => Str::headline($categoryData['name']),
+                    'description' => isset($categoryData['description']) && trim($categoryData['description']) !== '' 
+                        ? Str::of($categoryData['description'])->trim()->ucfirst()->toString()
+                        : null,
+                    'featured_image' => $categoryData['featured_image'] ?? null,
+                    'status' => (bool) ($categoryData['status'] ?? false),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            })->toArray();
+
+            Category::insert($bulkData);
+            
+            DB::commit();
+            return $this->successResponse(
+                'Categories created successfully!!', 
+                ['count' => count($bulkData)], 
+                201
+            );
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating categories ' . $e->getMessage() . ' In line: ' . $e->getLine());
+            return $this->errorResponse('Failed to create categories', 500);
         }
     }
 
@@ -97,7 +137,7 @@ class CategoryController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(CategoryFormRequest $request, Category $category): JsonResponse
+    public function update(UpdateCategoryRequest $request, Category $category): JsonResponse
     {
         DB::beginTransaction();
         try {
