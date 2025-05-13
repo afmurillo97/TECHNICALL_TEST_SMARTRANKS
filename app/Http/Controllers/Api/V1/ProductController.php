@@ -6,7 +6,9 @@ use App\Models\Product;
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Resources\Api\V1\ProductResource;
 use App\Http\Resources\Api\V1\ProductCollection;
-use App\Http\Requests\ProductFormRequest;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\BulkStoreProductRequest;
 use App\Filters\ProductFilter;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -43,21 +45,13 @@ class ProductController extends BaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductFormRequest $request): JsonResponse
+    public function store(StoreProductRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
             $product = new Product();
             $product->fill($request->validated());
             $product->sku = Str::upper(Str::random(10));
-
-            if($request->hasFile('featured_image')){
-                $featuredImage = $request->file('featured_image');
-                $featuredImageName = Str::slug($request->name) . '-' . uniqid() . '.' . $featuredImage->getClientOriginalExtension();
-                $featuredImagePath = $featuredImage->storeAs('public/products', $featuredImageName);
-
-                $product->featured_image = 'storage/' . str_replace('public/', '', $featuredImagePath);
-            }
             $product->save();
 
             DB::commit();
@@ -70,6 +64,50 @@ class ProductController extends BaseController
             DB::rollBack();
             Log::error('Error creating product ' . $e->getMessage() . ' In line: ' . $e->getLine());
             return $this->errorResponse('Failed to create product', 500);
+        }
+    }
+
+    /**
+     * Store several resources in storage.
+     */
+    public function bulkStore(BulkStoreProductRequest $request): JsonResponse
+    {
+
+
+        DB::beginTransaction();
+        try {
+            $validatedData = $request->validated();
+            
+            $bulkData = collect($validatedData)->map(function ($productData) {
+                return [
+                    'category_id' => $productData['category_id'],
+                    'name' => $productData['name'],
+                    'description' => $productData['description'],
+                    'purchase_price' => $productData['purchase_price'],
+                    'sale_price' => $productData['sale_price'],
+                    'stock' => $productData['stock'],
+                    'featured_image' => $productData['featured_image'],
+                    'status' => $productData['status'],
+                    'sku' => Str::upper(Str::random(10)),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            })->toArray();
+
+            Log::info('Datos finales antes de insert:', $bulkData);
+            Product::insert($bulkData);
+            
+            DB::commit();
+            return $this->successResponse(
+                'Products created successfully!!', 
+                ['count' => count($bulkData)], 
+                201
+            );
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating products ' . $e->getMessage() . ' In line: ' . $e->getLine());
+            return $this->errorResponse('Failed to create products', 500);
         }
     }
 
@@ -97,19 +135,12 @@ class ProductController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductFormRequest $request, Product $product): JsonResponse
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
         DB::beginTransaction();
         try {
             $product->fill($request->validated());
 
-            if($request->hasFile('featured_image')){
-                $featuredImage = $request->file('featured_image');
-                $featuredImageName = Str::slug($request->name) . '-' . uniqid() . '.' . $featuredImage->getClientOriginalExtension();
-                $featuredImagePath = $featuredImage->storeAs('public/products', $featuredImageName);
-
-                $product->featured_image = 'storage/' . str_replace('public/', '', $featuredImagePath);
-            }
             if (!$product->isDirty()) {
                 return $this->successResponse('No changes detected!!', null, 200);
             } 
