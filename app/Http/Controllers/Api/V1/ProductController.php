@@ -94,7 +94,6 @@ class ProductController extends BaseController
                 ];
             })->toArray();
 
-            Log::info('Datos finales antes de insert:', $bulkData);
             Product::insert($bulkData);
             
             DB::commit();
@@ -163,7 +162,7 @@ class ProductController extends BaseController
         try {
             $product->delete();
 
-            return $this->successResponse('Product deleted successfully', null, 200);
+            return $this->successResponse('Product deleted successfully', null, 204);
         } catch (\Exception $e) {
             Log::error('Error deleting product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to delete product', 500);
