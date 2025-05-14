@@ -3,16 +3,17 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class StoreCategoryRequest extends FormRequest
+class RegisterUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()->isAdmin();
+        return auth()->check() || auth()->user()->isAdmin();
     }
 
     /**
@@ -24,25 +25,20 @@ class StoreCategoryRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'featured_image' => ['nullable', 'string'],
-            'status' => ['required', 'boolean'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['sometimes', 'in:user,admin']
         ];
     }
 
-    /**
-     * This method is used to modify the input data before it is validated.
-     * 
-     * @return void
-     */
-    protected function prepareForValidation()
+    public function prepareForValidation()
     {
         $this->merge([
             'name' => Str::headline($this->input('name')),
-            'description' => $this->filled('description') 
-            ? Str::of($this->input('description'))->trim()->ucfirst()->toString()
-            : null,
-            'status' => (bool) $this->input('status'),
+            'password' => Hash::make($this->password),
+            'role' => auth()->user()->isAdmin()
+                ? $this->role ?? 'user'
+                : 'user'
         ]);
     }
 }
