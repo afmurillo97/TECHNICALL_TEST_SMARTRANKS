@@ -165,7 +165,7 @@ class CategoryController extends BaseController
         try {
             $category->delete();
 
-            return $this->successResponse('Category deleted successfully', null, 200);
+            return $this->successResponse('Category deleted successfully', null, 204);
         } catch (\Exception $e) {
             Log::error('Error deleting category ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to delete category', 500);
