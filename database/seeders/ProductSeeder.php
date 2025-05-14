@@ -15,8 +15,5 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         Product::factory(30)->create();
-        if (Product::count() !== 0) {
-            ProductImage::factory(50)->create();
-        }
     }
 }
