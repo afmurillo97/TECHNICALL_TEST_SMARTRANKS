@@ -37,8 +37,8 @@ class ProductController extends BaseController
         
         return $this->successResponse(
             'Products retrieved successfully',
-            $productsCollection,
-            200
+            200,
+            $productsCollection
         );
     }
 
@@ -57,8 +57,8 @@ class ProductController extends BaseController
             DB::commit();
             return $this->successResponse(
                 'Product created succesfully!!', 
-                ['product_id' => $product->id], 
-                201
+                201,
+                ['product_id' => $product->id],
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -99,8 +99,8 @@ class ProductController extends BaseController
             DB::commit();
             return $this->successResponse(
                 'Products created successfully!!', 
-                ['count' => count($bulkData)], 
-                201
+                201,
+                ['count' => count($bulkData)]
             );
             
         } catch (\Exception $e) {
@@ -122,8 +122,8 @@ class ProductController extends BaseController
 
             return $this->successResponse(
                 'Product retrieved successfully',
-                new ProductResource($product),
-                200
+                200,
+                new ProductResource($product)
             );
 
         } catch (\Exception $e) {
@@ -141,13 +141,13 @@ class ProductController extends BaseController
             $product->fill($request->validated());
 
             if (!$product->isDirty()) {
-                return $this->successResponse('No changes detected!!', null, 200);
+                return $this->successResponse('No changes detected!!', 200);
             } 
             
             $product->update();
 
             DB::commit();
-            return $this->successResponse('Product updated succesfully!!', null, 200);
+            return $this->successResponse('Product updated succesfully!!', 200);
         } catch (\Exception $e) {
             Log::error('Error updating product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to update product', 500);
@@ -162,7 +162,7 @@ class ProductController extends BaseController
         try {
             $product->delete();
 
-            return $this->successResponse('Product deleted successfully', null, 204);
+            return $this->successResponse('Product deleted successfully', 204);
         } catch (\Exception $e) {
             Log::error('Error deleting product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to delete product', 500);

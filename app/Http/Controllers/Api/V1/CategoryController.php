@@ -42,8 +42,8 @@ class CategoryController extends BaseController
 
         return $this->successResponse(
             'Categories retrieved successfully',
-            $categoriesCollection,
-            200
+            200,
+            $categoriesCollection
         );
     }
 
@@ -62,8 +62,9 @@ class CategoryController extends BaseController
             DB::commit();
             return $this->successResponse(
                 'Category created succesfully!!', 
-                ['category_id' => $category->id], 
-            201);
+                201,
+                ['category_id' => $category->id] 
+            );
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating category ' . $e->getMessage() . ' In line: ' . $e->getLine());
@@ -98,8 +99,8 @@ class CategoryController extends BaseController
             DB::commit();
             return $this->successResponse(
                 'Categories created successfully!!', 
-                ['count' => count($bulkData)], 
-                201
+                201,
+                ['count' => count($bulkData)]
             );
             
         } catch (\Exception $e) {
@@ -125,8 +126,8 @@ class CategoryController extends BaseController
 
             return $this->successResponse(
                 'Category retrieved successfully',
-                new categoryResource($category),
-                200
+                200,
+                new categoryResource($category)
             );
 
         } catch (\Exception $e) {
@@ -144,13 +145,13 @@ class CategoryController extends BaseController
             $category->fill($request->validated());
 
             if (!$category->isDirty()) {
-                return $this->successResponse('No changes detected!!', null, 200);
+                return $this->successResponse('No changes detected!!', 200);
             } 
             
             $category->update();
 
             DB::commit();
-            return $this->successResponse('Category updated succesfully!!', null, 200);
+            return $this->successResponse('Category updated succesfully!!', 200);
         } catch (\Exception $e) {
             Log::error('Error updating category ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to update category', 500);
@@ -165,7 +166,7 @@ class CategoryController extends BaseController
         try {
             $category->delete();
 
-            return $this->successResponse('Category deleted successfully', null, 204);
+            return $this->successResponse('Category deleted successfully', 204);
         } catch (\Exception $e) {
             Log::error('Error deleting category ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to delete category', 500);

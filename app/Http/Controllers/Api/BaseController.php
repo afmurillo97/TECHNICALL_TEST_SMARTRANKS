@@ -11,7 +11,7 @@ class BaseController extends Controller
     /**
      * Helper method to return a success response.
      */
-    protected function successResponse(string $message, $res = null, int $status): JsonResponse
+    protected function successResponse(string $message, int $status, $res = null): JsonResponse
     {
         $response = ['message' => $message];
         if (!is_null($res)) {

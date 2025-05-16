@@ -18,8 +18,8 @@ class AuthController extends BaseController
     {
         return $this->successResponse(
             'User retrieved successfully',
-            ['data' => auth()->user()],
-            200
+            200,
+            ['data' => auth()->user()]
         );
     }
     
@@ -38,8 +38,8 @@ class AuthController extends BaseController
 
         return $this->successResponse(
             'User created successfully',
-            $response,
-            200
+            200,
+            $response
         ); 
     }
 
@@ -57,8 +57,8 @@ class AuthController extends BaseController
 
         return $this->successResponse(
             'Welcome ' . $user->name . '!!!', 
-            ['data' => $user, 'token_type' => 'Bearer', 'access_token' => $token],
-            200
+            200,
+            ['data' => $user, 'token_type' => 'Bearer', 'access_token' => $token]
         ); 
     }
 
@@ -68,8 +68,8 @@ class AuthController extends BaseController
 
         return  $this->successResponse(
             'You have successfully logged out. All access tokens have been revoked.', 
-            ['logout_time' => now()->toDateTimeString()],
-            200
+            200,
+            ['logout_time' => now()->toDateTimeString()]
         );
     }
 }
