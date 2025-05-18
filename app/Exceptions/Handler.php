@@ -55,6 +55,13 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         if ($request->is('api/*')) {
+            if ($exception instanceof ModelNotFoundException || $exception instanceof NotFoundHttpException) {
+                Log::error('Model or Route not found: ' . $exception->getMessage());
+                return response()->json([
+                    'message' => 'Resource not found'
+                ], 404);
+            }
+
             if ($exception instanceof AuthenticationException || $exception instanceof RouteNotFoundException) {
                 return response()->json([
                     'message' => 'Unauthenticated.'
@@ -73,11 +80,6 @@ class Handler extends ExceptionHandler
                 ], 405);
             }
 
-            if ($exception instanceof ModelNotFoundException || $exception instanceof NotFoundHttpException) {
-                return response()->json([
-                    'message' => 'Resource not found'
-                ], 404);
-            }
         }
 
         return parent::render($request, $exception);
