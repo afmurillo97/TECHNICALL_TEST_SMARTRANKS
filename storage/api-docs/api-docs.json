@@ -1598,34 +1598,6 @@
     },
     "components": {
         "schemas": {
-            "SuccessResponse": {
-                "properties": {
-                    "message": {
-                        "type": "string",
-                        "example": "Operation successful"
-                    },
-                    "response": {
-                        "type": "object",
-                        "additionalProperties": true
-                    },
-                    "success_response": {
-                        "$ref": "#/components/schemas/SuccessResponse"
-                    },
-                    "error_response": {
-                        "$ref": "#/components/schemas/ErrorResponse"
-                    }
-                },
-                "type": "object"
-            },
-            "ErrorResponse": {
-                "properties": {
-                    "message": {
-                        "type": "string",
-                        "example": "Unauthenticated"
-                    }
-                },
-                "type": "object"
-            },
             "User": {
                 "title": "User Model",
                 "properties": {
@@ -2067,6 +2039,30 @@
                     "status": {
                         "type": "boolean",
                         "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "SuccessResponse": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Operation successful"
+                    },
+                    "response": {
+                        "description": "Response data object",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Unauthenticated"
                     }
                 },
                 "type": "object"

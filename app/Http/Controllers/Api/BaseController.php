@@ -45,19 +45,6 @@ use Illuminate\Http\JsonResponse;
  * )
  * 
  * @OA\Schema(
- *     schema="SuccessResponse",
- *     type="object",
- *     @OA\Property(property="message", type="string", example="Operation successful"),
- *     @OA\Property(property="response", type="object", additionalProperties=true)
- * )
- * 
- * @OA\Schema(
- *     schema="ErrorResponse",
- *     type="object",
- *     @OA\Property(property="message", type="string", example="Unauthenticated")
- * )
- * 
- * @OA\Schema(
  *     schema="User",
  *     title="User Model",
  *     type="object",
@@ -210,10 +197,17 @@ use Illuminate\Http\JsonResponse;
 class BaseController extends Controller
 {
     /**
-     * @OA\Property(
-     *     property="success_response",
+     * @OA\Schema(
+     *     schema="SuccessResponse",
      *     type="object",
-     *     ref="#/components/schemas/SuccessResponse"
+     *     @OA\Property(property="message", type="string", example="Operation successful"),
+     *     @OA\Property(
+     *         property="response",
+     *         type="object",
+     *         nullable=true,
+     *         additionalProperties=true,
+     *         description="Response data object"
+     *     )
      * )
      * 
      * @param string $message Success message
@@ -231,10 +225,10 @@ class BaseController extends Controller
     }
 
     /**
-     * @OA\Property(
-     *     property="error_response",
+     * @OA\Schema(
+     *     schema="ErrorResponse",
      *     type="object",
-     *     ref="#/components/schemas/ErrorResponse"
+     *     @OA\Property(property="message", type="string", example="Unauthenticated")
      * )
      * 
      * @param string $message Error message
