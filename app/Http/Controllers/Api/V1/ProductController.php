@@ -351,7 +351,7 @@ class ProductController extends BaseController
             $product->update();
 
             DB::commit();
-            return $this->successResponse('Product updated succesfully!!', 200);
+            return $this->successResponse('Product updated successfully!!', 200);
         } catch (\Exception $e) {
             Log::error('Error updating product ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to update product', 500);

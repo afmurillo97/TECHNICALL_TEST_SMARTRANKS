@@ -401,7 +401,7 @@ class CategoryController extends BaseController
             $category->update();
 
             DB::commit();
-            return $this->successResponse('Category updated succesfully!!', 200);
+            return $this->successResponse('Category updated successfully!!', 200);
         } catch (\Exception $e) {
             Log::error('Error updating category ' . $e->getMessage() . ' In Line: ' . $e->getLine());
             return $this->errorResponse('Failed to update category', 500);

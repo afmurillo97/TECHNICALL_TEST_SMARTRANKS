@@ -78,7 +78,7 @@ class AuthController extends BaseController
      *         )
      *     ),
      *     @OA\Response(
-     *         response=200,
+     *         response=201,
      *         description="User created successfully",
      *         @OA\JsonContent(
      *             allOf={
@@ -152,7 +152,7 @@ class AuthController extends BaseController
 
         return $this->successResponse(
             'User created successfully',
-            200,
+            201,
             $response
         ); 
     }
