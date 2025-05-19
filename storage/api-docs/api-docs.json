@@ -20,6 +20,10 @@
             "description": "Local Development Server"
         },
         {
+            "url": "http://localhost:8000",
+            "description": "Local Development Server"
+        },
+        {
             "url": "https://www.technical-test.site",
             "description": "Production Server"
         }
@@ -31,7 +35,7 @@
                     "Authentication"
                 ],
                 "summary": "Get authenticated user details",
-                "operationId": "66075d9238a9d1ebf1a3e3a3c6625ae4",
+                "operationId": "f016c0659a1d971af16fc5430fb93b55",
                 "responses": {
                     "200": {
                         "description": "User in Database",
@@ -81,7 +85,7 @@
                     "Authentication"
                 ],
                 "summary": "Register a new user",
-                "operationId": "a33b35d4b39df6585eb0990067548a08",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -123,7 +127,7 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "User created successfully",
                         "content": {
                             "application/json": {
@@ -321,7 +325,7 @@
                     "Authentication"
                 ],
                 "summary": "Revoke all access tokens",
-                "operationId": "c685e2688bb9ae47014fa5be7dfbea0a",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
                 "responses": {
                     "200": {
                         "description": "Logout successful",
