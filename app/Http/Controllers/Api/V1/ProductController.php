@@ -12,7 +12,6 @@ use App\Http\Requests\BulkStoreProductRequest;
 use App\Filters\ProductFilter;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;

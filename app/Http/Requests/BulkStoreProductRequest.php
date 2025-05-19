@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
 class BulkStoreProductRequest extends FormRequest
 {

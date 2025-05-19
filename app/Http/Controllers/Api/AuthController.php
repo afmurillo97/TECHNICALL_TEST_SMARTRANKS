@@ -8,9 +8,7 @@ use App\Http\Requests\LoginUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Validator;
 use App\Models\User;
-use \stdClass;
 
 /**
  * @OA\Tag(
