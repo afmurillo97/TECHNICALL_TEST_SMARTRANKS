@@ -16,16 +16,16 @@
     },
     "servers": [
         {
+            "url": "https://www.technical-test.site",
+            "description": "Production Server"
+        },
+        {
             "url": "http://api.smartranks.test",
             "description": "Local Development Server"
         },
         {
             "url": "http://localhost:8000",
             "description": "Local Development Server"
-        },
-        {
-            "url": "https://www.technical-test.site",
-            "description": "Production Server"
         }
     ],
     "paths": {
