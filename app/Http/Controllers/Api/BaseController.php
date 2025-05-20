@@ -26,6 +26,11 @@ use Illuminate\Http\JsonResponse;
  * )
  * 
  * @OA\Server(
+ *     url="https://www.technical-test.site",
+ *     description="Production Server"
+ * )
+ * 
+ * @OA\Server(
  *     url="http://api.smartranks.test",
  *     description="Local Development Server"
  * )
@@ -33,11 +38,6 @@ use Illuminate\Http\JsonResponse;
  * @OA\Server(
  *     url="http://localhost:8000",
  *     description="Local Development Server"
- * )
- * 
- * @OA\Server(
- *     url="https://www.technical-test.site",
- *     description="Production Server"
  * )
  * 
  * @OA\SecurityScheme(
