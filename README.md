@@ -3,11 +3,25 @@
 <div align="center">
 
 ## 🌐 Live Demo
-[Visit the Production Site](https://www.technical-test.site/)
-
 </div>
 
-A robust RESTful API built with Laravel 12 for managing products and categories with role-based access control. This project demonstrates best practices in API development, authentication, and authorization.
+<div align="center">
+  <a href="https://www.technical-test.site" target="_blank">
+    <img src="public/screenshots/screenshot_1.png" alt="Logo" height="300">
+  </a>
+
+  <h3 align="center">SmartRanks Technical Test API Proyect</h3>
+
+  <p align="center">
+    A robust RESTful API built with Laravel 12 for managing products and categories with role-based access control. This project demonstrates best practices in API development, authentication, and authorization.
+    <br />
+    <a href="https://github.com/afmurillo97/TECHNICALL_TEST_SMARTRANKS"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://www.technical-test.site" target="_blank">Visit the Production Site</a>
+    ·
+  </p>
+</div>
 
 ## About Author
 
@@ -37,6 +51,28 @@ A robust RESTful API built with Laravel 12 for managing products and categories 
 - [Design Decisions](#design-decisions)
 - [Testing](#testing)
 - [Deployment](#deployment)
+
+## Default Credentials
+
+The application comes with two default users for testing purposes:
+
+### Admin User
+- Email: admin@example.com
+- Password: password
+- Role: Admin
+
+### Regular User
+- Email: user@example.com
+- Password: password
+- Role: User
+
+<div align="center">
+  <a href="https://www.technical-test.site" target="_blank">
+    <img src="public/screenshots/screenshot_2.png" alt="Logo" height="300">
+  </a>
+</div>
+
+These credentials are created during the database seeding process. For security reasons, please change these passwords in a production environment.
 
 ## Features
 
@@ -370,34 +406,115 @@ The test suite includes:
 
 ### Production Deployment Steps
 
-1. Set up your production environment:
+1. Set up your production environment, in this case I use Hostinguer VPS:
 ```bash
 APP_ENV=production
 APP_DEBUG=false
 ```
 
-2. Optimize for production:
+2. Configure your web server (Apache/Nginx) to point to the `public` directory
+
+3. Set up SSL certificate for secure communication
+
+4. Configure your database:
 ```bash
+DB_CONNECTION=mysql
+DB_HOST=your_database_host
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_database_user
+DB_PASSWORD=your_database_password
+```
+
+5. Deploy your application via SSH:
+```bash
+# Clone the repository
+git clone https://github.com/afmurillo97/TECHNICALL_TEST_SMARTRANKS.git
+cd TECHNICALL_TEST_SMARTRANKS
+
+# Install PHP dependencies
 composer install --optimize-autoloader --no-dev
+
+# Generate application key
+php artisan key:generate
+
+# Run database migrations
+php artisan migrate --force
+
+# Optimize Laravel
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+# Install and build frontend assets
+npm install
+npm run build
+
+# Set proper permissions
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
 ```
-
-3. Set up your web server (Apache/Nginx) to point to the `public` directory
-
-4. Configure SSL for secure API communication
-
-5. Set up proper database credentials and connection
 
 ### Deployment Considerations
 
-- Use environment variables for sensitive data
-- Enable HTTPS
-- Set up proper logging
-- Configure backup strategy
-- Monitor application performance
-- Set up CI/CD pipeline
+- **Security**:
+  - Keep all software and dependencies updated
+  - Use strong passwords for all services
+  - Enable firewall and configure security groups
+  - Set up regular backups
+  - Monitor server logs for suspicious activity
+
+- **Performance**:
+  - Enable OPcache for PHP
+  - Configure Redis for caching (optional)
+  - Set up proper database indexes
+  - Enable compression in web server
+  - Configure CDN for static assets
+
+- **Monitoring**:
+  - Set up server monitoring (CPU, RAM, Disk)
+  - Configure application logging
+  - Set up error tracking
+  - Monitor database performance
+  - Set up uptime monitoring
+
+- **Maintenance**:
+  - Schedule regular backups
+  - Set up automated security updates
+  - Monitor disk space usage
+  - Keep SSL certificates up to date
+  - Regular security audits
+
+### Troubleshooting
+
+If you encounter issues during deployment:
+
+1. Check Laravel logs:
+```bash
+tail -f storage/logs/laravel.log
+```
+
+2. Verify file permissions:
+```bash
+ls -la storage bootstrap/cache
+```
+
+3. Check web server logs:
+```bash
+tail -f /var/log/apache2/error.log  # For Apache
+tail -f /var/log/nginx/error.log    # For Nginx
+```
+
+4. Verify environment configuration:
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+5. Check database connection:
+```bash
+php artisan db:monitor
+```
 
 ## License
 
