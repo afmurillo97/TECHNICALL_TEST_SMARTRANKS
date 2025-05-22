@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CategoryFactory extends Factory
 {
+    protected $model = Category::class;
+
     /**
      * Define the model's default state.
      *
@@ -18,9 +21,9 @@ class CategoryFactory extends Factory
     {
         return [
             'name' => $this->generateCategoryName(),
-            'description' => $this->faker->paragraph(),
-            'featured_image' => $this->faker->imageUrl(800, 600, 'categories', true, 'electronics', true),
-            'status' => $this->faker->boolean(90),
+            'description' => $this->faker->sentence(),
+            'featured_image' => $this->faker->imageUrl(),
+            'status' => $this->faker->boolean(90)
         ];
     }
 
