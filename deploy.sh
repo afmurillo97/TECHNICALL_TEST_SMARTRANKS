@@ -13,7 +13,7 @@ mkdir -p "$LOG_DIR"
 
 # Simple logging function with Bogota timezone
 echo_log() {
-    TZ='America/Bogota' echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+    echo "[$(TZ='America/Bogota' date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
 # Set permissions function
@@ -70,20 +70,30 @@ chmod -R 775 vendor node_modules 2>/dev/null || true
 
 # Install Composer dependencies
 echo_log "Installing Composer dependencies..."
+# First, ensure composer cache directory is writable
+mkdir -p ~/.composer/cache
+chmod -R 775 ~/.composer/cache
 composer install --no-dev --optimize-autoloader 2>&1 | tee -a "$LOG_FILE"
 
 # Install NPM dependencies and build assets
 echo_log "Installing NPM dependencies and building assets..."
-# First, ensure npm cache is clean
+# First, ensure npm cache is clean and writable
+mkdir -p ~/.npm
+chmod -R 775 ~/.npm
 npm cache clean --force 2>&1 | tee -a "$LOG_FILE"
+
 # Remove existing node_modules if it exists
 rm -rf node_modules 2>/dev/null || true
-# Install dependencies
-npm ci 2>&1 | tee -a "$LOG_FILE"
-# Install vite globally
-npm install -g vite 2>&1 | tee -a "$LOG_FILE"
-# Build assets
-npm run build 2>&1 | tee -a "$LOG_FILE"
+
+# Install dependencies locally
+npm ci --no-global 2>&1 | tee -a "$LOG_FILE"
+
+# Install vite locally
+npm install vite --save-dev 2>&1 | tee -a "$LOG_FILE"
+
+# Build assets using local vite
+echo_log "Building assets..."
+npx vite build 2>&1 | tee -a "$LOG_FILE"
 
 # Generate application key if not exists
 if ! grep -q "^APP_KEY=" .env; then
