@@ -48,7 +48,7 @@
                         Welcome to API SmartRanks
                     </h1>
                     <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                        A powerful and efficient API for managing products and categories
+                        A powerful and efficient API for managing products and categories with Swagger documentation.
                     </p>
                     <div class="flex justify-center space-x-4">
                         <a href="/api/documentation" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition duration-300">
