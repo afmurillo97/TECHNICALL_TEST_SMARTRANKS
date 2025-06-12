@@ -109,8 +109,16 @@ jobs:
     - name: Check Deployment Logs
       run: |
         echo "Checking deployment logs..."
-        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/logs/deploy.log" || {
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/htdocs/www.technical-test.site/storage/logs/deploy.log" || {
           echo "Failed to retrieve deployment logs"
+          exit 1
+        }
+        
+    - name: Check Laravel Logs
+      run: |
+        echo "Checking Laravel logs..."
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/htdocs/www.technical-test.site/storage/logs/laravel.log" || {
+          echo "Failed to retrieve Laravel logs"
           exit 1
         }
         
@@ -138,4 +146,6 @@ jobs:
         echo "Deployment failed!"
         echo "Please check the logs for more information."
         echo "Last 50 lines of deployment log:"
-        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/logs/deploy.log" || true 
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/htdocs/www.technical-test.site/storage/logs/deploy.log" || true
+        echo "Last 50 lines of Laravel log:"
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/htdocs/www.technical-test.site/storage/logs/laravel.log" || true 
