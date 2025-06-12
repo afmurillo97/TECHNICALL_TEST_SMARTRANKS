@@ -15,9 +15,30 @@ APP_ENV="production"
 PHP_VERSION="8.1"
 NODE_VERSION="18"
 
+# Function to set permissions
+set_permissions() {
+    local path="$1"
+    log "Setting permissions for $path"
+    
+    # Set ownership
+    chown -R admin-tt:www-data "$path"
+    
+    # Set directory permissions
+    find "$path" -type d -exec chmod 775 {} \;
+    
+    # Set file permissions
+    find "$path" -type f -exec chmod 664 {} \;
+    
+    # Set special permissions for storage and cache
+    if [ -d "$path/storage" ]; then
+        chmod -R 775 "$path/storage"
+        chmod -R 775 "$path/bootstrap/cache"
+    fi
+}
+
 # Ensure log directory exists and is writable
 mkdir -p "$LOG_DIR"
-chmod -R 775 "$LOG_DIR"
+set_permissions "$LOG_DIR"
 
 # Logging function
 log() {
@@ -127,25 +148,6 @@ optimize_application() {
     fi
 }
 
-# Set proper permissions
-set_permissions() {
-    log "Setting proper permissions..."
-    if [ -d "$DEPLOY_PATH" ]; then
-        # Set directory permissions
-        find "$DEPLOY_PATH" -type d -exec chmod 755 {} \;
-        
-        # Set file permissions
-        find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
-        
-        # Set special permissions for storage and cache
-        chmod -R 775 "$DEPLOY_PATH/storage"
-        chmod -R 775 "$DEPLOY_PATH/bootstrap/cache"
-        
-        # Set proper ownership
-        chown -R admin-tt:admin-tt "$DEPLOY_PATH"
-    fi
-}
-
 # Deploy new version
 deploy() {
     log "=== Starting deployment process ==="
@@ -175,7 +177,7 @@ deploy() {
     run_migrations
     clear_cache
     optimize_application
-    set_permissions
+    set_permissions "$DEPLOY_PATH"
     
     # Restart PHP-FPM
     log "Restarting PHP-FPM..."
