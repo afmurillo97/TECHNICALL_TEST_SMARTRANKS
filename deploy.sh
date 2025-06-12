@@ -11,9 +11,9 @@ LOG_FILE="$LOG_DIR/deploy.log"
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-# Simple logging function
+# Simple logging function with Bogota timezone
 echo_log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+    TZ='America/Bogota' echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
 # Set permissions function
@@ -63,13 +63,26 @@ if [ ! -f .env ]; then
     fi
 fi
 
+# Ensure vendor and node_modules directories exist and are writable
+echo_log "Setting up dependency directories..."
+mkdir -p vendor node_modules
+chmod -R 775 vendor node_modules 2>/dev/null || true
+
 # Install Composer dependencies
 echo_log "Installing Composer dependencies..."
 composer install --no-dev --optimize-autoloader 2>&1 | tee -a "$LOG_FILE"
 
 # Install NPM dependencies and build assets
 echo_log "Installing NPM dependencies and building assets..."
+# First, ensure npm cache is clean
+npm cache clean --force 2>&1 | tee -a "$LOG_FILE"
+# Remove existing node_modules if it exists
+rm -rf node_modules 2>/dev/null || true
+# Install dependencies
 npm ci 2>&1 | tee -a "$LOG_FILE"
+# Install vite globally
+npm install -g vite 2>&1 | tee -a "$LOG_FILE"
+# Build assets
 npm run build 2>&1 | tee -a "$LOG_FILE"
 
 # Generate application key if not exists
@@ -80,6 +93,8 @@ fi
 
 # Configure Swagger
 echo_log "Configuring Swagger documentation..."
+# Ensure storage directory is writable
+chmod -R 775 storage 2>/dev/null || true
 php artisan l5-swagger:generate 2>&1 | tee -a "$LOG_FILE"
 
 # Run database migrations
