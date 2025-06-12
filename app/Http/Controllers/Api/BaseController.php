@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
  * @OA\Info(
  *     title="SmartRanks Technical Test API",
  *     version="1.0.0",
- *     description="A comprehensive RESTful API for SmartRanks jobsearch platform. This API provides endpoints for managing products, categories, and user authentication. Built as part of a technical assessment to demonstrate RESTful API development best practices.",
+ *     description="A comprehensive RESTful API for SmartRanks jobsearch platform. This API provides endpoints for managing products, categories, and user authentication. Built as part of a technical assessment to demonstrate RESTful API development best practices. Swagger documentation is available at /api/documentation",
  *     @OA\Contact(
  *         email="afmurillo97@gmail.com",
  *         name="Felipe Murillo",
