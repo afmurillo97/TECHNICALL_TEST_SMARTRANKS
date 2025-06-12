@@ -52,7 +52,7 @@
                     </p>
                     <div class="flex justify-center space-x-4">
                         <a href="/api/documentation" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition duration-300">
-                            View Documentation
+                            View Documentation <i class="fas fa-book"></i>
                         </a>
                     </div>
                 </div>
