@@ -21,19 +21,21 @@ set_permissions() {
     local path="$1"
     echo_log "Setting permissions for $path"
     
-    # Set ownership
-    chown -R admin-tt:www-data "$path"
-    
-    # Set directory permissions
-    find "$path" -type d -exec chmod 775 {} \;
-    
-    # Set file permissions
-    find "$path" -type f -exec chmod 664 {} \;
-    
-    # Set special permissions for storage and cache
-    if [ -d "$path/storage" ]; then
-        chmod -R 775 "$path/storage"
-        chmod -R 775 "$path/bootstrap/cache"
+    # Only change permissions if we have write access
+    if [ -w "$path" ]; then
+        # Set directory permissions
+        find "$path" -type d -exec chmod 775 {} \; 2>/dev/null || true
+        
+        # Set file permissions
+        find "$path" -type f -exec chmod 664 {} \; 2>/dev/null || true
+        
+        # Set special permissions for storage and cache
+        if [ -d "$path/storage" ]; then
+            chmod -R 775 "$path/storage" 2>/dev/null || true
+            chmod -R 775 "$path/bootstrap/cache" 2>/dev/null || true
+        fi
+    else
+        echo_log "Warning: No write access to $path, skipping permission changes"
     fi
 }
 
@@ -46,7 +48,7 @@ cd "$DEPLOY_PATH" || {
     exit 1
 }
 
-# Set initial permissions
+# Set initial permissions for log directory
 set_permissions "$LOG_DIR"
 
 # Check for .env file
@@ -60,9 +62,6 @@ if [ ! -f .env ]; then
         exit 1
     fi
 fi
-
-# Set permissions for the entire project
-set_permissions "$DEPLOY_PATH"
 
 # Install Composer dependencies
 echo_log "Installing Composer dependencies..."
@@ -106,9 +105,14 @@ php artisan view:cache 2>&1 | tee -a "$LOG_FILE"
 echo_log "Optimizing the application..."
 php artisan optimize 2>&1 | tee -a "$LOG_FILE"
 
-# Final permissions check
-echo_log "Performing final permissions check..."
-set_permissions "$DEPLOY_PATH"
+# Set permissions for storage and cache directories
+echo_log "Setting permissions for storage and cache directories..."
+if [ -d "storage" ]; then
+    chmod -R 775 storage 2>/dev/null || true
+fi
+if [ -d "bootstrap/cache" ]; then
+    chmod -R 775 bootstrap/cache 2>/dev/null || true
+fi
 
 # Restart PHP-FPM (using systemd service)
 echo_log "Restarting PHP-FPM..."
