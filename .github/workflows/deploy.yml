@@ -30,7 +30,7 @@ jobs:
         
     - name: Install Composer Dependencies
       run: |
-        composer install --no-dev --optimize-autoloader || {
+        composer install --optimize-autoloader || {
           echo "Composer install failed"
           exit 1
         }
@@ -48,7 +48,12 @@ jobs:
         
     - name: Run Tests
       run: |
-        php artisan test || {
+        # Create test environment file
+        cp .env.example .env.testing
+        php artisan key:generate --env=testing
+        
+        # Run tests with PHPUnit directly
+        ./vendor/bin/phpunit || {
           echo "Tests failed"
           exit 1
         }
