@@ -14,6 +14,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       
+    - name: Debug Information
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        echo "GitHub workspace: $GITHUB_WORKSPACE"
+      
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -22,46 +29,93 @@ jobs:
         coverage: none
         
     - name: Install Composer Dependencies
-      run: composer install --no-dev --optimize-autoloader
+      run: |
+        composer install --no-dev --optimize-autoloader || {
+          echo "Composer install failed"
+          exit 1
+        }
       
     - name: Install NPM Dependencies
       run: |
-        npm ci
-        npm run build
+        npm ci || {
+          echo "NPM install failed"
+          exit 1
+        }
+        npm run build || {
+          echo "NPM build failed"
+          exit 1
+        }
         
     - name: Run Tests
-      run: php artisan test
+      run: |
+        php artisan test || {
+          echo "Tests failed"
+          exit 1
+        }
       
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.4
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         
+    - name: Debug SSH Setup
+      run: |
+        echo "SSH agent is running: $SSH_AUTH_SOCK"
+        ssh-add -l || echo "No keys added to SSH agent"
+        
     - name: Add SSH known hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+        echo "Added host key for ${{ secrets.SERVER_HOST }}"
         
     - name: Deploy to server
       run: |
-        # Copy deployment script to server
-        scp deploy.sh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}:/home/admin-tt/
+        echo "Starting deployment..."
+        echo "Server: ${{ secrets.SERVER_HOST }}"
+        echo "User: ${{ secrets.SSH_USER }}"
+        
+        # Test SSH connection
+        ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "echo 'SSH connection successful'" || {
+          echo "SSH connection test failed"
+          exit 1
+        }
+        
+        # Copy deployment script
+        echo "Copying deployment script..."
+        scp -v deploy.sh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}:/home/admin-tt/ || {
+          echo "Failed to copy deployment script"
+          exit 1
+        }
         
         # Copy .env file if it exists
         if [ -f .env ]; then
-          scp .env ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}:/home/admin-tt/htdocs/www.technical-test.site/
+          echo "Copying .env file..."
+          scp -v .env ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}:/home/admin-tt/htdocs/www.technical-test.site/ || {
+            echo "Failed to copy .env file"
+            exit 1
+          }
+        else
+          echo "No .env file found, skipping..."
         fi
         
         # Execute deployment script
-        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "chmod +x /home/admin-tt/deploy.sh && /home/admin-tt/deploy.sh"
+        echo "Executing deployment script..."
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "chmod +x /home/admin-tt/deploy.sh && /home/admin-tt/deploy.sh" || {
+          echo "Deployment script execution failed"
+          exit 1
+        }
         
     - name: Verify Deployment
       run: |
-        # Wait for deployment to complete
+        echo "Waiting for deployment to complete..."
         sleep 30
         
-        # Check if the application is responding
-        curl -f https://www.technical-test.site/api/documentation || exit 1
+        echo "Checking application response..."
+        curl -v https://www.technical-test.site/api/documentation || {
+          echo "Application verification failed"
+          exit 1
+        }
         
     - name: Notify on Success
       if: success()
@@ -74,4 +128,6 @@ jobs:
       if: failure()
       run: |
         echo "Deployment failed!"
-        echo "Please check the logs for more information." 
+        echo "Please check the logs for more information."
+        echo "Last 50 lines of deployment log:"
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/logs/deploy.log" || true 
