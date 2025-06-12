@@ -106,6 +106,14 @@ jobs:
           exit 1
         }
         
+    - name: Check Deployment Logs
+      run: |
+        echo "Checking deployment logs..."
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} "tail -n 50 /home/admin-tt/logs/deploy.log" || {
+          echo "Failed to retrieve deployment logs"
+          exit 1
+        }
+        
     - name: Verify Deployment
       run: |
         echo "Waiting for deployment to complete..."
