@@ -16,13 +16,12 @@ PHP_VERSION="8.1"
 NODE_VERSION="18"
 
 # Ensure log directory exists and is writable
-sudo mkdir -p "$LOG_DIR"
-sudo chown -R admin-tt:admin-tt "$LOG_DIR"
-sudo chmod -R 775 "$LOG_DIR"
+mkdir -p "$LOG_DIR"
+chmod -R 775 "$LOG_DIR"
 
 # Logging function
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | sudo tee -a "$LOG_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
 # Error handling
@@ -47,15 +46,15 @@ install_dependencies() {
     if [ -f "$DEPLOY_PATH/composer.json" ]; then
         log "Installing Composer dependencies..."
         cd "$DEPLOY_PATH"
-        composer install --no-dev --optimize-autoloader 2>&1 | sudo tee -a "$LOG_FILE"
+        composer install --no-dev --optimize-autoloader 2>&1 | tee -a "$LOG_FILE"
     fi
     
     # NPM dependencies and build
     if [ -f "$DEPLOY_PATH/package.json" ]; then
         log "Installing NPM dependencies..."
         cd "$DEPLOY_PATH"
-        npm ci --production 2>&1 | sudo tee -a "$LOG_FILE"
-        npm run build 2>&1 | sudo tee -a "$LOG_FILE"
+        npm ci --production 2>&1 | tee -a "$LOG_FILE"
+        npm run build 2>&1 | tee -a "$LOG_FILE"
     fi
 }
 
@@ -65,7 +64,7 @@ generate_key() {
     if [ -f "$DEPLOY_PATH/.env" ]; then
         if ! grep -q "^APP_KEY=" "$DEPLOY_PATH/.env"; then
             cd "$DEPLOY_PATH"
-            php artisan key:generate --force 2>&1 | sudo tee -a "$LOG_FILE"
+            php artisan key:generate --force 2>&1 | tee -a "$LOG_FILE"
         fi
     fi
 }
@@ -81,7 +80,7 @@ configure_swagger() {
         sed -i 's/L5_SWAGGER_UI_PERSIST_AUTHORIZATION=false/L5_SWAGGER_UI_PERSIST_AUTHORIZATION=true/' .env
         
         # Generate Swagger documentation
-        php artisan l5-swagger:generate 2>&1 | sudo tee -a "$LOG_FILE"
+        php artisan l5-swagger:generate 2>&1 | tee -a "$LOG_FILE"
         
         # Set proper permissions for Swagger documentation
         if [ -d "$DEPLOY_PATH/storage/api-docs" ]; then
@@ -96,11 +95,11 @@ run_migrations() {
     log "Running database migrations..."
     if [ -f "$DEPLOY_PATH/artisan" ]; then
         cd "$DEPLOY_PATH"
-        php artisan migrate --force 2>&1 | sudo tee -a "$LOG_FILE"
+        php artisan migrate --force 2>&1 | tee -a "$LOG_FILE"
         
         # Run seeders if needed (usually only in development)
         if [ "$APP_ENV" = "development" ]; then
-            php artisan db:seed 2>&1 | sudo tee -a "$LOG_FILE"
+            php artisan db:seed 2>&1 | tee -a "$LOG_FILE"
         fi
     fi
 }
@@ -110,10 +109,10 @@ clear_cache() {
     log "Clearing application cache..."
     if [ -f "$DEPLOY_PATH/artisan" ]; then
         cd "$DEPLOY_PATH"
-        php artisan config:clear 2>&1 | sudo tee -a "$LOG_FILE"
-        php artisan cache:clear 2>&1 | sudo tee -a "$LOG_FILE"
-        php artisan view:clear 2>&1 | sudo tee -a "$LOG_FILE"
-        php artisan route:clear 2>&1 | sudo tee -a "$LOG_FILE"
+        php artisan config:clear 2>&1 | tee -a "$LOG_FILE"
+        php artisan cache:clear 2>&1 | tee -a "$LOG_FILE"
+        php artisan view:clear 2>&1 | tee -a "$LOG_FILE"
+        php artisan route:clear 2>&1 | tee -a "$LOG_FILE"
     fi
 }
 
@@ -122,9 +121,9 @@ optimize_application() {
     log "Optimizing application..."
     if [ -f "$DEPLOY_PATH/artisan" ]; then
         cd "$DEPLOY_PATH"
-        php artisan optimize 2>&1 | sudo tee -a "$LOG_FILE"
-        php artisan config:cache 2>&1 | sudo tee -a "$LOG_FILE"
-        php artisan route:cache 2>&1 | sudo tee -a "$LOG_FILE"
+        php artisan optimize 2>&1 | tee -a "$LOG_FILE"
+        php artisan config:cache 2>&1 | tee -a "$LOG_FILE"
+        php artisan route:cache 2>&1 | tee -a "$LOG_FILE"
     fi
 }
 
@@ -139,13 +138,11 @@ set_permissions() {
         find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
         
         # Set special permissions for storage and cache
-        if [ -d "$DEPLOY_PATH/storage" ]; then
-            chmod -R 775 "$DEPLOY_PATH/storage"
-            chmod -R 775 "$DEPLOY_PATH/bootstrap/cache"
-        fi
+        chmod -R 775 "$DEPLOY_PATH/storage"
+        chmod -R 775 "$DEPLOY_PATH/bootstrap/cache"
         
         # Set proper ownership
-        sudo chown -R admin-tt:admin-tt "$DEPLOY_PATH"
+        chown -R admin-tt:admin-tt "$DEPLOY_PATH"
     fi
 }
 
@@ -168,7 +165,7 @@ deploy() {
     if [ -d "$DEPLOY_PATH/.git" ]; then
         log "Pulling latest changes..."
         cd "$DEPLOY_PATH"
-        git pull origin main 2>&1 | sudo tee -a "$LOG_FILE"
+        git pull origin main 2>&1 | tee -a "$LOG_FILE"
     fi
     
     # Run deployment tasks
@@ -182,11 +179,11 @@ deploy() {
     
     # Restart PHP-FPM
     log "Restarting PHP-FPM..."
-    sudo systemctl restart php8.2-fpm
+    systemctl --user restart php8.2-fpm || true
 
     # Restart Nginx
     log "Restarting Nginx..."
-    sudo systemctl restart nginx
+    systemctl --user restart nginx || true
 
     log "=== Deployment process completed ==="
 }
